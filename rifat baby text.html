@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello, World!</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+      <h1 class="title">Hello I am Tapas welcome to my World 🌎!</h1>
+      <p id="currentTime"></p>
+      <script src="script.js"></script>
+  </body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultra Handwriting App</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+  margin:0;
+  font-family:Arial;
+  text-align:center;
+  background-image: url("https://i.ibb.co/0RrNnnbZ/tapas-pramanik.jpg");
+  background-size: cover;
+}
+
+.container {
+  max-width:900px;
+  margin:auto;
+  padding:15px;
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  border-radius:15px;
+}
+
+input, textarea, select {
+  width:100%;
+  margin:6px 0;
+  padding:10px;
+  border-radius:10px;
+}
+
+button {
+  width:48%;
+  margin:5px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:black;
+  color:white;
+}
+
+canvas {
+  width:100%;
+  margin-top:15px;
+  border-radius:10px;
+}
+
+@media(max-width:600px){
+  button { width:100%; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🔥 Ultra Handwriting Generator</h2>
+
+<input id="title" placeholder="Enter Heading">
+<textarea id="text" placeholder="Write your assignment..."></textarea>
+
+<label>Page Type</label>
+<select id="pageType">
+  <option value="ruled">Ruled Page</option>
+  <option value="plain">Plain Page</option>
+</select>
+
+<label>Ink Color</label>
+<input type="color" id="color" value="#000000">
+
+<label>Font Size</label>
+<input type="range" id="size" min="18" max="40" value="24">
+
+<label>Line Spacing</label>
+<input type="range" id="spacing" min="25" max="60" value="35">
+
+<br>
+
+<button onclick="generate()">Generate</button>
+<button onclick="downloadPDF()">Download PDF</button>
+
+<div id="pages"></div>
+
+</div>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+function createPage(){
+ let canvas=document.createElement("canvas");
+ canvas.width=800;
+ canvas.height=1000;
+
+ let ctx=canvas.getContext("2d");
+
+ let type=document.getElementById("pageType").value;
+ let gap=document.getElementById("spacing").value;
+
+ ctx.fillStyle="white";
+ ctx.fillRect(0,0,800,1000);
+
+ if(type === "ruled"){
+  ctx.strokeStyle="#cce0ff";
+  for(let y=60;y<1000;y+=gap){
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(800,y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle="red";
+  ctx.beginPath();
+  ctx.moveTo(80,0);
+  ctx.lineTo(80,1000);
+  ctx.stroke();
+ }
+
+ return {canvas,ctx};
+}
+
+function generate(){
+
+ let text=document.getElementById("text").value;
+ let title=document.getElementById("title").value;
+ let color=document.getElementById("color").value;
+ let size=document.getElementById("size").value;
+ let spacing=document.getElementById("spacing").value;
+
+ let words=text.split(" ");
+
+ let container=document.getElementById("pages");
+ container.innerHTML="";
+
+ let page=createPage();
+ container.appendChild(page.canvas);
+
+ let ctx=page.ctx;
+
+ ctx.fillStyle=color;
+
+ let x=90, y=80;
+
+ // title
+ ctx.font="bold "+(parseInt(size)+6)+"px Patrick Hand";
+ ctx.fillText(title,90,40);
+
+ ctx.font=size+"px Patrick Hand";
+
+ words.forEach(word=>{
+
+  let w=ctx.measureText(word+" ").width;
+
+  if(x+w>700){
+    x=90;
+    y+=parseInt(spacing);
+  }
+
+  if(y>950){
+    page=createPage();
+    container.appendChild(page.canvas);
+    ctx=page.ctx;
+
+    ctx.fillStyle=color;
+    ctx.font=size+"px Patrick Hand";
+
+    x=90;
+    y=80;
+  }
+
+  ctx.fillText(word,x,y);
+  x+=w;
+
+ });
+
+}
+
+function downloadPDF(){
+ let canvases=document.querySelectorAll("canvas");
+ let pdf=new jsPDF("p","px",[800,1000]);
+
+ canvases.forEach((c,i)=>{
+  let img=c.toDataURL("image/png");
+  if(i>0) pdf.addPage();
+  pdf.addImage(img,"PNG",0,0,800,1000);
+ });
+
+ pdf.save("handwriting.pdf");
+}
+</script>
+
+</body>
+</html>
